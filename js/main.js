@@ -29,7 +29,9 @@ $(document).ready(function(){
             $('table tbody').append($('<tr>'));
             var section_h = "<span class='star'></span>";
             var row = $('table tbody tr:last');
-            var ob = Object.values(this);
+            var ob = Object.keys(this).map(key=>{
+            	return this[key];	
+            });
             for(var i = 0; i < 8; i++){
             	if(i==0){
             		row.append($('<td>')).find('td:last').append($("<span class='star'>"));
