@@ -1,7 +1,7 @@
 $(document).ready(function(){
-	var urlData1 = "data/data1.json";
-	var urlData2 = "data/data2.json";
-	var urlData3 = "data/data3.json";
+	var urlData1 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data1.json";
+	var urlData2 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data2.json";
+	var urlData3 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data3.json";
 	//使用promise執行多個同步ajax request
 	function ajax(url, callback){
 		var p = new Promise((resolve, reject)=>{
