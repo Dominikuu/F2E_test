@@ -2,17 +2,16 @@ $(document).ready(function(){
 	var urlData1 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data1.json";
 	var urlData2 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data2.json";
 	var urlData3 = "https://raw.githubusercontent.com/Dominikuu/F2E_test/master/data/data3.json";
-	//使用promise執行多個同步ajax request
+	const timeDiffer = startTime => (new Date() - startTime) / 1000;
+  
 	function ajax(url, callback){
 		var p = new Promise((resolve, reject)=>{
 			$.ajax({
 				url: url,
 				type: 'GET',
 				dataType: 'json',
-				async: false,
 				success: (response)=>{
-					callback(response)
-					resolve()
+					resolve(response)
 				},
 				error: (XMLHttpRequest, textStatus, errThrown)=>{
 					alert(XMLHttpRequest.responseText);
@@ -22,61 +21,68 @@ $(document).ready(function(){
 		})
 		return p;
 	}
-	ajax(urlData1, (data)=>{
-    	$('table').append($('<tbody>'));
-    	//建立表格
-        $.each(data, function(index, element) {
-            $('table tbody').append($('<tr>'));
+	//ajax
+	Promise.all([
+		ajax(urlData1),
+		ajax(urlData2),
+		ajax(urlData3),
+	]).then(([data1, data2, data3])=>{
+		const startTime = new Date();
+		$('table').append($('<tbody>'));
+		//data1
+		for(var index= 0; index < data1.length; index++){
             var section_h = "<span class='star'></span>";
-            var row = $('table tbody tr:last');
-            var ob = Object.keys(this).map(key=>{
-            	return this[key];	
-            });
-            for(var i = 0; i < 8; i++){
-            	if(i==0){
-            		row.append($('<td>')).find('td:last').append($("<span class='star'>"));
-            		row.find('td:last').html(section_h+this.key);		
-            	}else{
-            		row.append($('<td>')).find('td:last').text(ob[i])
-            	}
-            }
-    	})
-    	
-	}).then(
-	//data2.json的key對應data1.json的key
-		ajax(urlData2, function(data){
-			var row = $('tbody').find('tr');
-	        $.each(data, function(index, element) {
-	            //key值去除第一個字，轉換成int作為index
-	            var key = this.key.slice(1);
-	            var index = parseInt(key);
-	            row.eq(index).append($('<td>')).find('td:last').text(this.cell8);
-	    	})
-		})
-	).then(
-		ajax(urlData3, function(data){
-			var row = $('tbody').find('tr');
-	    	$.each(data, function(index, element) {
-	            //key值去除第一個字與倒數兩個數字，轉換成int作為index
-	            var key = this.cell4.slice(1,-2);
-	            var index = parseInt(key);
-	            row.eq(index).append($('<td>')).find('td:last').text(this.cell9);
-	    	})	
-		})
-	)
-	//點擊 tr 可產生整列背景變色效果 (上一次點選列應恢復預設)
-	$('tbody').find("tr").each(function(){
-		$(this).click(function(event){
-        	$(this).toggleClass('selected')
-        })	
-	})
-	//點擊星星可產生圖片變化效果 (但列背景不應變色)
-	$('td').find("span").each(function(){
-		$(this).click(function(event){
-        	$(this).toggleClass('selected')
-        	//避免row也跟著變色(上層元素不跟著變動)
-        	event.stopPropagation();
-        })	
-	})
+            var ob = Object.keys(data1[index]).map(key=>{
+            	return data1[index][key];	
+			});
+			
+			trHTML = '<tr>';
+			for(var i = 0; i < 8 ; i++){
+				trHTML += '<td>'
+				if(i==0){
+					trHTML += section_h +data1[index].key
+				}else{
+					trHTML += ob[i]
+				}
+				trHTML += '</td>'
+			}
+			trHTML +='</tr>'
+			$('table tbody').append(trHTML);
+		}
+		
+		//data2
+		var row = $('tbody').find('tr');
+		//data2鐨刱ey绉婚櫎绗竴鍊嬪瓧鍏冨緦灏辨槸data1鐨刱ey
+		for(var index=0; index<data2.length;index++){
+			var key = data2[index].key.slice(1);
+			var _index = parseInt(key);
+			var contentHTML ="<td>"+data2[index].cell8+"</td>"
+			row.eq(_index).append(contentHTML)
+		}
 
+		//data3
+		keyOfData = Object.keys(data3)
+		keyOfData.some((_key)=>{
+			//data3鐨刢ell4绉婚櫎绗竴鍊嬪拰鏈叐鍊嬪瓧鍏冨緦灏辨槸data1鐨刱ey
+			var key = data3[_key].cell4.slice(1,-2);
+			var index = parseInt(key);
+			var contentHTML ="<td>"+data3[_key].cell9+"</td>"
+			row.eq(index).append(contentHTML)
+		})
+		//浜嬩欢瑷诲唺
+		$('tbody').find("tr").each(function(){
+			$(this).click(function(event){
+				$(this).toggleClass('selected')
+			})	
+		})
+		$('td').find("span").each(function(){
+			$(this).click(function(event){
+				$(this).toggleClass('selected')
+				//閬垮厤鍚戜笂瑙哥櫦tr
+				event.stopPropagation();
+			})	
+		})
+		console.log(timeDiffer(startTime))
+		$(".usuage").html(timeDiffer(startTime));
+	})
 });
